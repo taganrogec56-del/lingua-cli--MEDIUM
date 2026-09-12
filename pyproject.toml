@@ -1,0 +1,19 @@
+[build-system]
+requires = ['setuptools>=77.0.3']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = "lingua-cli"
+version = "0.1.0"
+description = "Terminal translator and English dictionary"
+dependencies = [
+    "requests",
+    "python-dotenv",
+    "rich",
+]
+
+[project.scripts]
+lingua-cli = "main:main"
+
+[tool.setuptools]
+py-modules = ["main"]

@@ -6,9 +6,9 @@ A Python command-line project for translating text and looking up English words.
 
 ## Project status
 
-In development. The initial project setup and Python entry point are in place.
-Command-line parsing, API integrations, and formatted output are planned and are
-not implemented yet.
+In development. Packaging is configured for the `lingua-cli` command, and basic
+argument parsing with `--help` is implemented. The `translate` and `word`
+subcommands, API integrations, and formatted output are not implemented yet.
 
 ## Planned features
 
@@ -36,18 +36,29 @@ From the project directory, run these commands in PowerShell:
 
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -e .
+.\.venv\Scripts\Activate.ps1
 ```
 
 If `.venv` already exists, use the existing environment and skip its creation.
+The editable installation (`-e .`) installs the project and its dependencies while
+keeping it linked to the source files. Changes to existing Python code are available
+on the next run; repeat the installation after changing packaging metadata.
 
-To run the current entry point:
+With the environment activated, display the command-line help:
 
 ```powershell
-.\.venv\Scripts\python.exe main.py
+lingua-cli --help
 ```
 
-At this stage, the entry point exits without producing output.
+Activate `.venv` in each new terminal session to use the short command. You can
+also display the help without activation from the project directory:
+
+```powershell
+.\.venv\Scripts\lingua-cli.exe --help
+```
+
+At this stage, running `lingua-cli` without arguments exits without producing output.
 
 ## Planned configuration
 
@@ -67,9 +78,8 @@ added after the translation provider is selected.
 These commands describe the intended interface and are not functional yet:
 
 ```powershell
-.\.venv\Scripts\python.exe main.py translate "Hello world" --to ru
-.\.venv\Scripts\python.exe main.py word hello
-.\.venv\Scripts\python.exe main.py --help
+lingua-cli translate "Hello world" --to ru
+lingua-cli word hello
 ```
 
 ## Current project structure
@@ -77,6 +87,7 @@ These commands describe the intended interface and are not functional yet:
 ```text
 lingua-cli/
 ├── main.py              # Application entry point
+├── pyproject.toml       # Packaging metadata and CLI command
 ├── .env.example         # Configuration template
 ├── .gitignore           # Local files excluded from Git
 ├── requirements.txt     # Third-party dependencies
