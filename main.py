@@ -1,4 +1,5 @@
 import argparse
+from dictionary import run_word_command
 
 
 def main():
@@ -35,7 +36,7 @@ def main():
     args = parser.parse_args()
 
     if args.command == 'word':
-        print(f'Слово для поиска {args.word}')
+        run_word_command(args.word)
     elif args.command == 'translate':
         print(f'Текст из {args.text}, язык перевода {args.to}')
 
