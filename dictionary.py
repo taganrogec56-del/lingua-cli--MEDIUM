@@ -1,8 +1,22 @@
 import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError, RequestException
+from rich.console import Console
+from rich.panel import Panel
+
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    TimeElapsedColumn,
+)
+
+console = Console(
+    force_terminal=True,
+    color_system='truecolor',
+)
 
 
-def get_word_info(word: str):
+def get_word_info(word: str) -> list[dict]:
     url = f'https://api.dictionaryapi.dev/api/v2/entries/en/{word}'
     response = requests.get(url, timeout=40)
     response.raise_for_status()
@@ -22,42 +36,59 @@ def get_transcription(entry_dict: dict) -> str | None:
     return None
 
 
-def display_word_info(data_from_api) -> None:
+def display_word_info(data_from_api: list[dict]) -> None:
     for entry in data_from_api:
+        word = entry.get('word', 'Написание слова отсутствует')
+
         phonetic_text = get_transcription(entry)
-        if phonetic_text:
-            print(f'Транскрипция: {phonetic_text}')
-        else:
-            print('Транскрипция: нет данных')
+        transcription = phonetic_text or 'Нет данных'
+
+        console.print(
+            Panel.fit(
+                f'[bold]Транскрипция:[/bold] [green]{transcription}[/green]',
+                title=f'[bold cyan]{word}[/bold cyan]',
+                border_style='blue', )
+        )
 
         for meaning in entry.get('meanings', []):
-            print(f"Часть речи: {meaning.get('partOfSpeech', 'не указана')}")
+            console.print(f"[bold]Часть речи:[/bold] {meaning.get('partOfSpeech', 'не указана')}")
             definitions = meaning.get('definitions', [])
 
             for item in definitions[:3]:
-                print(f"  Определение: {item.get('definition', 'не указано')}")
-                example = item.get('example')
+                console.print(f"  [italic]Определение:[/italic] {item.get('definition', 'не указано')}")
+                example = item.get('example') or 'нет данных'
                 if example:
-                    print(f'  Пример: {example}')
-                else:
-                    print('  Пример: нет данных')
+                    console.print(f'  Пример: {example}')
 
                 synonyms = item.get('synonyms', [])
                 if synonyms:
-                    print(f'  Синонимы: {", ".join(synonyms)}')
+                    console.print(f'  Синонимы: {", ".join(synonyms)}')
                 else:
-                    print('  Синонимы: нет данных')
+                    console.print('  Синонимы: нет данных')
 
                 antonyms = item.get('antonyms', [])
                 if antonyms:
-                    print(f'  Антонимы: {", ".join(antonyms)}')
+                    console.print(f'  Антонимы: {", ".join(antonyms)}')
                 else:
-                    print('  Антонимы: нет данных')
+                    console.print('  Антонимы: нет данных')
 
 
 def run_word_command(word: str) -> None:
     try:
-        data = get_word_info(word)
+        with Progress(
+                SpinnerColumn(
+                    spinner_name='dots',
+                    style='bold cyan',
+                ),
+                TextColumn(
+                    '[bold cyan]Ожидание ответа сервера...[/bold cyan]'
+                ),
+                TimeElapsedColumn(),
+                console=console,
+                transient=True,
+        ) as progress:
+            progress.add_task('request', total=None)
+            data = get_word_info(word)
     except Timeout:
         print('Ошибка: сервер слишком долго отвечает.')
     except ConnectionError:
