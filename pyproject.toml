@@ -16,4 +16,4 @@ dependencies = [
 lingua-cli = "main:main"
 
 [tool.setuptools]
-py-modules = ["main", "dictionary"]
+py-modules = ["main", "dictionary", "config"]
