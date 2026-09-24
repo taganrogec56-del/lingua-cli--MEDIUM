@@ -75,7 +75,11 @@ def run_translate_command(text: str, lang: str) -> None:
 def translate_text(text: str, target_language: str) -> tuple[str, str]:
     api_key = get_translator_api_key()
     if api_key is None:
-        raise ValueError('API-ключ переводчика не найден')
+        raise ValueError(
+            'API-ключ переводчика не найден.\n\n'
+            'Создайте файл .env в папке проекта и добавьте:\n\n'
+            'TRANSLATOR_API_KEY=ваш_ключ_доступа_из_DeepL'
+        )
     headers = {
         'Authorization': f'DeepL-Auth-Key {api_key}',
         'Content-Type': 'application/json',

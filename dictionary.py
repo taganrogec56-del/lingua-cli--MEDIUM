@@ -3,6 +3,7 @@ from requests.exceptions import Timeout, ConnectionError, HTTPError, RequestExce
 from rich.console import Console
 from rich.markup import escape
 from rich.panel import Panel
+from rich.table import Table
 
 from rich.progress import (
     Progress,
@@ -51,27 +52,47 @@ def display_word_info(data_from_api: list[dict]) -> None:
                 border_style='blue', )
         )
 
+        table = Table(
+            header_style='bold cyan',
+            border_style='blue',
+            show_lines=True,
+            expand=True,
+        )
+        table.add_column('Часть речи', no_wrap=True)
+        table.add_column('Определение', ratio=2)
+        table.add_column('Пример', ratio=1)
+
+        related_terms = []
         for meaning in entry.get('meanings', []):
-            console.print(f"[bold]Часть речи:[/bold] {escape(str(meaning.get('partOfSpeech', 'не указана')))}")
+            part_of_speech = str(meaning.get('partOfSpeech', 'не указана'))
             definitions = meaning.get('definitions', [])
 
-            for item in definitions[:3]:
-                console.print(f"  [italic]Определение:[/italic] {escape(str(item.get('definition', 'не указано')))}")
-                example = item.get('example') or 'нет данных'
-                if example:
-                    console.print(f'  Пример: {escape(str(example))}')
+            if not definitions:
+                table.add_row(escape(part_of_speech), 'не указано', 'нет данных')
+
+            for number, item in enumerate(definitions[:3], start=1):
+                definition = str(item.get('definition', 'не указано'))
+                example = str(item.get('example') or 'нет данных')
+                table.add_row(
+                    escape(part_of_speech),
+                    f'{number}. {escape(definition)}',
+                    escape(example),
+                )
 
                 synonyms = item.get('synonyms', [])
-                if synonyms:
-                    console.print(f'  Синонимы: {escape(", ".join(synonyms))}')
-                else:
-                    console.print('  Синонимы: нет данных')
-
                 antonyms = item.get('antonyms', [])
-                if antonyms:
-                    console.print(f'  Антонимы: {escape(", ".join(antonyms))}')
-                else:
-                    console.print('  Антонимы: нет данных')
+                if synonyms or antonyms:
+                    related_terms.append((part_of_speech, number, synonyms, antonyms))
+
+        if table.row_count:
+            console.print(table)
+
+        for part_of_speech, number, synonyms, antonyms in related_terms:
+            label = f'{escape(part_of_speech)}, определение {number}'
+            if synonyms:
+                console.print(f'Синонимы ({label}): {escape(", ".join(synonyms))}')
+            if antonyms:
+                console.print(f'Антонимы ({label}): {escape(", ".join(antonyms))}')
 
 
 def run_word_command(word: str) -> None:
