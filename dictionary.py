@@ -119,6 +119,13 @@ def run_word_command(word: str) -> None:
     except HTTPError as error:
         if error.response is not None and error.response.status_code == 404:
             print(f'Слово "{word}" не найдено.')
+        elif error.response is not None and error.response.status_code == 522:
+            print('Ошибка HTTP 522: сервер словаря не ответил вовремя.')
+            print(
+                'Такое иногда бывает при запросе редкого или отсутствующего '
+                'слова, но этот ответ не подтверждает, что слово не найдено. '
+                'Попробуйте позже.'
+            )
         else:
             status_code = (
                 error.response.status_code
