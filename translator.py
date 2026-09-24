@@ -6,10 +6,17 @@ from requests.exceptions import (
     RequestException,
     JSONDecodeError,
 )
+from rich.console import Console
+from rich.markup import escape
+from rich.panel import Panel
 from config import REQUEST_TIMEOUT, get_translator_api_key
 
 TRANSLATE_URL = 'https://api-free.deepl.com/v2/translate'
 
+console = Console(
+    force_terminal=True,
+    color_system='truecolor',
+)
 
 def run_translate_command(text: str, lang: str) -> None:
     text = text.strip()
@@ -55,8 +62,14 @@ def run_translate_command(text: str, lang: str) -> None:
     except RequestException:
         print('Ошибка: не удалось выполнить запрос на перевод.')
     else:
-        print(f'Перевод с {source_language} на {lang}')
-        print(f'Текст перевода: {translated_text}')
+        console.print(
+            Panel.fit(
+                f'[bold]Исходный текст: [/bold] {escape(text)}\n'
+                f'[bold]Перевод: [/bold] {escape(translated_text)}\n'
+                f'[bold]Языки: [/bold]{escape(source_language)} → {escape(lang)}',
+                title=f'[bold cyan]Переводчик DeepL: [/bold cyan]',
+                border_style='blue', )
+        )
 
 
 def translate_text(text: str, target_language: str) -> tuple[str, str]:

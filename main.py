@@ -40,7 +40,6 @@ def main():
         run_word_command(args.word)
     elif args.command == 'translate':
         run_translate_command(args.text, args.to)
-        # print(f'Текст из {args.text}, язык перевода {args.to}')
 
 
 if __name__ == '__main__':

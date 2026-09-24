@@ -1,6 +1,7 @@
 import requests
 from requests.exceptions import Timeout, ConnectionError, HTTPError, RequestException
 from rich.console import Console
+from rich.markup import escape
 from rich.panel import Panel
 
 from rich.progress import (
@@ -45,30 +46,30 @@ def display_word_info(data_from_api: list[dict]) -> None:
 
         console.print(
             Panel.fit(
-                f'[bold]Транскрипция:[/bold] [green]{transcription}[/green]',
-                title=f'[bold cyan]{word}[/bold cyan]',
+                f'[bold]Транскрипция:[/bold] [green]{escape(str(transcription))}[/green]',
+                title=f'[bold cyan]{escape(str(word))}[/bold cyan]',
                 border_style='blue', )
         )
 
         for meaning in entry.get('meanings', []):
-            console.print(f"[bold]Часть речи:[/bold] {meaning.get('partOfSpeech', 'не указана')}")
+            console.print(f"[bold]Часть речи:[/bold] {escape(str(meaning.get('partOfSpeech', 'не указана')))}")
             definitions = meaning.get('definitions', [])
 
             for item in definitions[:3]:
-                console.print(f"  [italic]Определение:[/italic] {item.get('definition', 'не указано')}")
+                console.print(f"  [italic]Определение:[/italic] {escape(str(item.get('definition', 'не указано')))}")
                 example = item.get('example') or 'нет данных'
                 if example:
-                    console.print(f'  Пример: {example}')
+                    console.print(f'  Пример: {escape(str(example))}')
 
                 synonyms = item.get('synonyms', [])
                 if synonyms:
-                    console.print(f'  Синонимы: {", ".join(synonyms)}')
+                    console.print(f'  Синонимы: {escape(", ".join(synonyms))}')
                 else:
                     console.print('  Синонимы: нет данных')
 
                 antonyms = item.get('antonyms', [])
                 if antonyms:
-                    console.print(f'  Антонимы: {", ".join(antonyms)}')
+                    console.print(f'  Антонимы: {escape(", ".join(antonyms))}')
                 else:
                     console.print('  Антонимы: нет данных')
 
