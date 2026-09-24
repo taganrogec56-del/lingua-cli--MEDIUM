@@ -6,20 +6,19 @@ A Python command-line project for translating text and looking up English words.
 
 ## Project status
 
-In development. The English dictionary command is functional and uses the
-[Free Dictionary API](https://dictionaryapi.dev/). The CLI packaging,
-`argparse` subcommands, formatted Rich output, and request error handling are
-also implemented.
-
-The `translate` subcommand and its arguments are already available, but it
-currently prints a placeholder instead of calling a translation API. Selecting
-a translation provider and implementing `config.py` and `translator.py` are the
-next milestones.
+In development. The `word` command uses the
+[Free Dictionary API](https://dictionaryapi.dev/), and `translate` sends requests
+to the DeepL API Free endpoint. Both commands are available through `argparse`
+and the installed `lingua-cli` command. Dictionary results use Rich; translation
+results currently use plain text.
 
 ## Available features
 
 - Run the application as `lingua-cli` or through `main.py`.
 - Display help for the CLI and its subcommands.
+- Translate words and phrases into a selected language through DeepL API Free.
+- Show the source language detected by the translation API.
+- Load the DeepL API key from a local `.env` file or an environment variable.
 - Look up English words with `lingua-cli word <word>`.
 - Display every dictionary entry returned for a word.
 - Display phonetic transcription, parts of speech, and up to three definitions
@@ -30,25 +29,26 @@ next milestones.
 - Show a spinner and elapsed time while waiting for the dictionary server.
 - Handle timeouts, connection failures, general request errors, HTTP errors,
   and words that are not found.
+- Handle missing translation API keys, empty translation input, invalid JSON,
+  and common translation API errors.
 
 ## Planned features
 
-- Translate words and phrases into a selected language.
-- Detect the source language through the translation API.
-- Load the translation API key from a local `.env` file.
-- Validate empty input, unsupported languages, and translation API errors.
 - Format translation results with Rich.
+- Complete the required manual test scenarios and improve guidance for missing
+  API keys.
 
 ## Technology stack
 
 - **Python** — application logic and modules.
 - **argparse** — command-line arguments and subcommands; part of the standard library.
 - **requests** — HTTP requests to external APIs.
-- **python-dotenv** — planned loading of local configuration from `.env`.
+- **python-dotenv** — loading local configuration from `.env`.
 - **rich** — panels, colors, and the request activity indicator.
 - **Free Dictionary API** — English dictionary data.
+- **DeepL API Free** — text translation and source-language detection.
 
-The translation API provider has not been selected yet.
+Translation requires a valid DeepL API Free key.
 
 ## Local setup
 
@@ -79,7 +79,7 @@ You can also run the application without activating the environment:
 .\.venv\Scripts\lingua-cli.exe word hello
 ```
 
-## Current usage
+## Usage
 
 Look up an English word:
 
@@ -99,27 +99,30 @@ The dictionary command displays a Rich panel with the word and transcription,
 followed by its parts of speech, definitions, examples, synonyms, and antonyms.
 If the API returns several dictionary entries, all of them are processed.
 
-The translation interface already accepts the intended arguments:
+Translate text into a selected language:
 
 ```powershell
 lingua-cli translate "Hello world" --to ru
+lingua-cli translate "Как дела?" --to en
 ```
 
-However, this command currently prints a development placeholder and does not
-perform a translation request yet.
+The translation command sends a request to DeepL and prints the detected source
+language, target language, and translated text. Its output is not yet formatted
+with Rich.
 
-## Planned configuration
+## Configuration
 
-The translation integration will read `TRANSLATOR_API_KEY` from the environment
-or a local `.env` file. Use `.env.example` as the configuration template:
+Create a `.env` file in the project directory using `.env.example` as a template.
+Put your DeepL API Free key in it:
 
 ```dotenv
-TRANSLATOR_API_KEY=your_api_key_here
+TRANSLATOR_API_KEY=your_actual_deepl_key
 ```
 
-Keep the real key in `.env`, which is excluded from Git. The `.env.example`
-template contains only a placeholder. Instructions for obtaining a key will be
-added after the translation provider is selected.
+The same variable can also be supplied through the environment. Keep the real
+key in `.env`, which is excluded from Git; `.env.example` contains only a
+placeholder. Without a key, the translation command reports an error. The word
+command does not require a key.
 
 ## Current project structure
 
@@ -127,6 +130,8 @@ added after the translation provider is selected.
 lingua-cli/
 ├── main.py              # Argument parsing and command dispatch
 ├── dictionary.py        # Dictionary API, response parsing, and Rich output
+├── translator.py        # DeepL request, response parsing, and error handling
+├── config.py            # Environment loading and shared request timeout
 ├── pyproject.toml       # Packaging metadata and CLI command
 ├── .env.example         # Translation configuration template
 ├── .gitignore           # Local files excluded from Git
@@ -136,10 +141,8 @@ lingua-cli/
 └── README.ru.md         # Documentation in Russian
 ```
 
-The planned `translator.py` module will handle translation API access and
-response parsing. The planned `config.py` module will load the API key and
-shared settings. `main.py` will then call the translator instead of the current
-placeholder.
+`main.py` calls `run_word_command()` or `run_translate_command()` according to
+the selected subcommand.
 
 ## Learning goals
 

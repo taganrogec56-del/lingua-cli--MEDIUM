@@ -1,5 +1,6 @@
 import argparse
 from dictionary import run_word_command
+from translator import run_translate_command
 
 
 def main():
@@ -38,7 +39,8 @@ def main():
     if args.command == 'word':
         run_word_command(args.word)
     elif args.command == 'translate':
-        print(f'Текст из {args.text}, язык перевода {args.to}')
+        run_translate_command(args.text, args.to)
+        # print(f'Текст из {args.text}, язык перевода {args.to}')
 
 
 if __name__ == '__main__':
